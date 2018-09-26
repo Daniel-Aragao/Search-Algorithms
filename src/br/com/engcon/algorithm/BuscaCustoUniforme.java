@@ -29,10 +29,8 @@ public class BuscaCustoUniforme extends SearchIA {
 	}
 
 	public float search(Node o, Node t) {
-		List<Node> border = new ArrayList<Node>();
-		
-		float weight = 0;
-		
+		List<Node> border = new ArrayList<Node>();		
+		float weight = 0;		
 		Node current = o;
 		
 		current.getOtherAttributes().put("BCUWeight", 0F);
@@ -41,21 +39,26 @@ public class BuscaCustoUniforme extends SearchIA {
 		
 		while(border.size() > 0 && current != t){
 			Collections.sort(border, getComparator());
-			
-			current = border.remove(0);
+			current = border.remove(0);			
 			
 			weight = (Float) current.getOtherAttributes().get("BCUWeight");
 			
 			List<Node> childrens = current.getNeighborsOut();
 			
 			for(Node children : childrens) {
-				if(children.getOtherAttributes().get("BCUWeight") == null){
-					Edge edge = current.getEdgeWith(children);
+				Edge edge = current.getEdgeWith(children);
+				
+				Float childrenWeight = (Float) children.getOtherAttributes().get("BCUWeight");
+				Float newWeight = weight + Float.parseFloat((String) edge.getOtherAttributes().get("distance"));
+				
+				if(childrenWeight == null || childrenWeight > newWeight){
 					
-					children.getOtherAttributes().put("BCUWeight", weight + Float.parseFloat((String) edge.getOtherAttributes().get("distance")));
+					children.getOtherAttributes().put("BCUWeight", newWeight);
 					children.getOtherAttributes().put("parent_node", current);
 					
-					border.add(children);
+					if(childrenWeight == null) {
+						border.add(children);						
+					}
 				}
 			}
 		}
@@ -80,8 +83,7 @@ public class BuscaCustoUniforme extends SearchIA {
 	
 	private Comparator<Node> getComparator() {
 		if(comparator == null) {
-			comparator = new Comparator<Node>() {
-				
+			comparator = new Comparator<Node>() {				
 				@Override
 				public int compare(Node n0, Node n1) {
 					float f0 = (Float) n0.getOtherAttributes().get("BCUWeight");
