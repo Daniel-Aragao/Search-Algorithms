@@ -14,8 +14,8 @@ public class BuscaCustoUniforme extends SearchIA {
 	private Comparator<Node> comparator;
 
 	public static void main(String[] args) throws Exception {
-//		String graphName = "caxeiro";
-		String graphName = "bus-network";
+		String graphName = "caxeiro";
+		graphName = "bus-network";
 
 		Graph graph = Import.loadGraph(graphName);
 		
@@ -23,17 +23,13 @@ public class BuscaCustoUniforme extends SearchIA {
 		
 		if(graphName.equals("caxeiro")) {
 			System.out.println("cost = "+bl.search(graph.getNode("arad"), graph.getNode("bucharest")));			
-		}else {
-			
+		}else {			
 			System.out.println("cost = "+bl.search(graph.getNode("p_5729"), graph.getNode("p_2500")));
 		}
-		
 	}
 
 	public float search(Node o, Node t) {
-//		Collections.sort(list, c);
 		List<Node> border = new ArrayList<Node>();
-		List<Node> path = new ArrayList<Node>();
 		
 		float weight = 0;
 		
@@ -47,27 +43,34 @@ public class BuscaCustoUniforme extends SearchIA {
 			Collections.sort(border, getComparator());
 			
 			current = border.remove(0);
-			path.add(current);
 			
 			weight = (Float) current.getOtherAttributes().get("BCUWeight");
 			
 			List<Node> childrens = current.getNeighborsOut();
 			
 			for(Node children : childrens) {
-				Edge edge = current.getEdgeWith(children);
-				
-				children.getOtherAttributes().put("BCUWeight", weight + edge.getWeight());
-				
-				if(!path.contains(children) && !border.contains(children)){
+				if(children.getOtherAttributes().get("BCUWeight") == null){
+					Edge edge = current.getEdgeWith(children);
+					
+					children.getOtherAttributes().put("BCUWeight", weight + Float.parseFloat((String) edge.getOtherAttributes().get("distance")));
+					children.getOtherAttributes().put("parent_node", current);
+					
 					border.add(children);
 				}
 			}
 		}
 		
 		if(current == t) {
-			for(Node n : path) {
-				System.out.println(n.getId());
+			Node printCurrent = current;
+
+			int count = 0;
+			
+			while(printCurrent != null) {
+				System.out.println(printCurrent);
+				printCurrent = (Node) printCurrent.getOtherAttributes().get("parent_node");
+				count++;
 			}
+			System.out.println("Nós no caminho: " + count);
 			
 			return weight;			
 		}
@@ -91,8 +94,4 @@ public class BuscaCustoUniforme extends SearchIA {
 		
 		return comparator; 
 	}
-	
-	
-//	public Comparator
-
 }
